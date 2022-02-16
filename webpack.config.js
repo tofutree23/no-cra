@@ -1,20 +1,39 @@
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
+const webpack = require("webpack");
+const prod = process.env.NODE_ENV === "production";
 
 module.exports = {
-  entry: {
-    main: "./src/index.js",
-  },
+  mode: prod ? "production" : "development",
+  devtool: prod ? "hidden-source-map" : "eval",
+  entry: "./src/index.tsx",
   resolve: {
     extensions: [".js", ".jsx", ".ts", ".tsx"],
   },
-  devtool: "eval-cheap-source-map",
-  devServer: {
-    hot: true,
-    overlay: true,
-    writeToDisk: true,
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: ["babel-loader", "ts-loader"],
+      },
+    ],
   },
   output: {
+    path: path.join(__dirname, "/dist"),
     filename: "bundle.js",
-    path: path.resolve(__dirname + '/dist')
   },
+  devServer: {
+    historyApiFallback: true,
+    port: 3000,
+    hot: true,
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      React: "react",
+    }),
+    new HtmlWebpackPlugin({
+      template: "./public/index.html",
+    }),
+    new webpack.HotModuleReplacementPlugin(),
+  ],
 };
